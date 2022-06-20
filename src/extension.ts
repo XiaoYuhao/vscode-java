@@ -475,6 +475,8 @@ export function activate(context: ExtensionContext): Promise<ExtensionAPI> {
 				}));
 			}
 			context.subscriptions.push(workspace.onDidChangeTextDocument(event => handleTextBlockClosing(event.document, event.contentChanges)));
+
+			context.subscriptions.push(commands.registerCommand(Commands.RESTART_LANGUAGE_SERVER, async () => restartStanderServer(context, requirements, clientOptions, workspacePath, resolve)));
 		});
 	});
 }
@@ -496,6 +498,11 @@ async function startStandardServer(context: ExtensionContext, requirements: requ
 	}
 	await standardClient.initialize(context, requirements, clientOptions, workspacePath, jdtEventEmitter, resolve);
 	standardClient.start();
+	serverStatusBarProvider.showStandardStatus();
+}
+
+async function restartStanderServer(context: ExtensionContext, requirements: requirements.RequirementsData, clientOptions: LanguageClientOptions, workspacePath: string, resolve: (value?: ExtensionAPI | PromiseLike<ExtensionAPI>) => void) {
+	standardClient.restart(context, requirements, clientOptions, workspacePath, resolve);
 	serverStatusBarProvider.showStandardStatus();
 }
 

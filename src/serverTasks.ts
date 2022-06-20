@@ -25,6 +25,10 @@ export namespace serverTasks {
 	export function getHistory(): ProgressReport[] {
 		return tasks;
 	}
+
+	export function cleanUpTasks() {
+		tasks = [];
+	}
 }
 
 function organizeTasks() {

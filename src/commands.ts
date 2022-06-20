@@ -240,7 +240,7 @@ export namespace Commands {
      * Get all java projects root path in URI format
      */
     export const GET_ALL_JAVA_PROJECTS = 'java.project.getAll';
-    /**
+	/**
      * Command to switch between standard mode and lightweight mode.
      */
     export const SWITCH_SERVER_MODE = 'java.server.mode.switch';
@@ -260,4 +260,8 @@ export namespace Commands {
     export const GET_WORKSPACE_PATH = '_java.workspace.path';
 
     export const UPGRADE_GRADLE_WRAPPER = '_java.gradle.upgradeWrapper';
+
+	export const LOMBOK_CONFIGURE = "java.lombokConfigure";
+
+	export const RESTART_LANGUAGE_SERVER = "java.restartLanguageServer";
 }

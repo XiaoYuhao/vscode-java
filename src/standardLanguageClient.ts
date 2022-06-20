@@ -5,7 +5,7 @@ import { Commands } from "./commands";
 import { serverStatus, ServerStatusKind } from "./serverStatus";
 import { prepareExecutable, awaitServerConnection } from "./javaServerStarter";
 import { getJavaConfig, applyWorkspaceEdit } from "./extension";
-import { LanguageClientOptions, Position as LSPosition, Location as LSLocation, MessageType, TextDocumentPositionParams, ConfigurationRequest, ConfigurationParams } from "vscode-languageclient";
+import { LanguageClientOptions, Position as LSPosition, Location as LSLocation, MessageType, TextDocumentPositionParams, ConfigurationRequest, ConfigurationParams, CodeLensResolveRequest } from "vscode-languageclient";
 import { LanguageClient, StreamInfo } from "vscode-languageclient/node";
 import { CompileWorkspaceRequest, CompileWorkspaceStatus, SourceAttachmentRequest, SourceAttachmentResult, SourceAttachmentAttribute, ProjectConfigurationUpdateRequest, FeatureStatus, StatusNotification, ProgressReportNotification, ActionableNotification, ExecuteClientCommandRequest, ServerNotification, EventNotification, EventType, LinkLocation, FindLinks, GradleCompatibilityInfo, UpgradeGradleWrapperInfo } from "./protocol";
 import { setGradleWrapperChecksum, excludeProjectSettingsFiles, ServerMode } from "./settings";
@@ -36,6 +36,8 @@ import { findRuntimes, IJavaRuntime } from "jdk-utils";
 import { snippetCompletionProvider } from "./snippetCompletionProvider";
 import { JavaInlayHintsProvider } from "./inlayHintsProvider";
 import { gradleCodeActionMetadata, GradleCodeActionProvider } from "./gradle/gradleCodeActionProvider";
+import { checkLombokDependency } from "./lombokSupport";
+import { setTimeout } from "timers";
 
 const extensionName = 'Language Support for Java';
 const GRADLE_CHECKSUM = "gradle/checksum/prompt";
@@ -55,7 +57,7 @@ export class StandardLanguageClient {
 			return;
 		}
 
-		const hasImported: boolean = await fse.pathExists(path.join(workspacePath, ".metadata", ".plugins"));
+		//const hasImported: boolean = await fse.pathExists(path.join(workspacePath, ".metadata", ".plugins"));
 
 		if (workspace.getConfiguration().get("java.showBuildStatusOnStart.enabled") === "terminal") {
 			commands.executeCommand(Commands.SHOW_SERVER_TASK_STATUS);
@@ -74,9 +76,23 @@ export class StandardLanguageClient {
 			} else if (status === ServerStatusKind.Warning) {
 				serverStatusBarProvider.setWarning();
 			} else {
+				console.log("server ready.");
 				serverStatusBarProvider.setReady();
 			}
 		});
+
+		await this.createLanguageClient(context, requirements, clientOptions, workspacePath, resolve);
+
+		this.registerCommandsForStandardServer(context, jdtEventEmitter);
+		//fileEventHandler.registerFileEventHandlers(this.languageClient, context);
+
+		collectBuildFilePattern(extensions.all);
+
+		this.status = ClientStatus.Initialized;
+	}
+
+	private async createLanguageClient(context: ExtensionContext, requirements: RequirementsData, clientOptions: LanguageClientOptions, workspacePath: string, resolve: (value: ExtensionAPI) => void) {
+		const hasImported: boolean = await fse.pathExists(path.join(workspacePath, ".metadata", ".plugins"));
 
 		let serverOptions;
 		const port = process.env['SERVER_PORT'];
@@ -99,8 +115,9 @@ export class StandardLanguageClient {
 			serverOptions = awaitServerConnection.bind(null, port);
 		}
 
-		// Create the language client and start the client.
 		this.languageClient = new LanguageClient('java', extensionName, serverOptions, clientOptions);
+
+		serverTasks.cleanUpTasks();
 
 		this.languageClient.onReady().then(() => {
 			activationProgressNotification.showProgress();
@@ -114,6 +131,10 @@ export class StandardLanguageClient {
 						if (!hasImported) {
 							showImportFinishNotification(context);
 						}
+						checkLombokDependency(context);
+						apiManager.getApiInstance().onDidClasspathUpdate((e: Uri) => {
+							checkLombokDependency(context);
+						});
 						// Disable the client-side snippet provider since LS is ready.
 						snippetCompletionProvider.dispose();
 						break;
@@ -266,12 +287,7 @@ export class StandardLanguageClient {
 			});
 		});
 
-		this.registerCommandsForStandardServer(context, jdtEventEmitter);
 		fileEventHandler.registerFileEventHandlers(this.languageClient, context);
-
-		collectBuildFilePattern(extensions.all);
-
-		this.status = ClientStatus.Initialized;
 	}
 
 	private showGradleCompatibilityIssueNotification(message: string, options: string[], projectUri: string, gradleVersion: string, newJavaHome: string) {
@@ -528,6 +544,18 @@ export class StandardLanguageClient {
 			}
 		}
 		return Promise.resolve();
+	}
+
+	public async restart(context: ExtensionContext, requirements: RequirementsData, clientOptions: LanguageClientOptions, workspacePath: string, resolve: (value: ExtensionAPI) => void) {
+		this.status = ClientStatus.Stopping;
+		let oldLanguageClient = this.languageClient;
+		this.languageClient = null;
+		await oldLanguageClient.stop();
+		const delay = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
+		await delay(3000);
+		await this.createLanguageClient(context, requirements, clientOptions, workspacePath, resolve);
+		this.languageClient.start();
+		this.status = ClientStatus.Starting;
 	}
 
 	public getClient(): LanguageClient {
