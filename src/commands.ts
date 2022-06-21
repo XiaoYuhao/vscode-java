@@ -264,4 +264,6 @@ export namespace Commands {
 	export const LOMBOK_CONFIGURE = "java.lombokConfigure";
 
 	export const RESTART_LANGUAGE_SERVER = "java.restartLanguageServer";
+
+	export const GET_LANGUAGE_SERVER_PID = "java.ls.processId";
 }

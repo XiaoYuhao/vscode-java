@@ -549,10 +549,21 @@ export class StandardLanguageClient {
 	public async restart(context: ExtensionContext, requirements: RequirementsData, clientOptions: LanguageClientOptions, workspacePath: string, resolve: (value: ExtensionAPI) => void) {
 		this.status = ClientStatus.Stopping;
 		let oldLanguageClient = this.languageClient;
+		let pid : number = await commands.executeCommand<number>(Commands.EXECUTE_WORKSPACE_COMMAND, Commands.GET_LANGUAGE_SERVER_PID);
 		this.languageClient = null;
 		await oldLanguageClient.stop();
 		const delay = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
-		await delay(3000);
+		while(true) {
+			try {
+				await delay(500);
+				process.kill(pid, 0);
+				console.log("wait for pid : " + pid);
+				continue;
+			}
+			catch{
+				break;
+			}
+		}
 		await this.createLanguageClient(context, requirements, clientOptions, workspacePath, resolve);
 		this.languageClient.start();
 		this.status = ClientStatus.Starting;
