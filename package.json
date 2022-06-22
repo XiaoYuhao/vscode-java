@@ -898,6 +898,12 @@
           "default": "ignore",
           "markdownDescription": "Project encoding settings",
           "scope": "window"
+        },
+        "java.jdt.ls.lombokSupport.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable lombok support",
+          "scope": "window"
         }
       }
     },

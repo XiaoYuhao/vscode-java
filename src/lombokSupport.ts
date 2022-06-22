@@ -24,7 +24,12 @@ const languageServerDocumentSelector = [
 	{ pattern: '**/{build,settings}.gradle.kts'}
 ];
 
-let hasLombokChangeVersionCommand : boolean = false;
+let hasLombokChangeVersionCommand: boolean = false;
+const lombokSupportEnable: boolean = vscode.workspace.getConfiguration().get("java.jdt.ls.lombokSupport.enabled");
+
+export function enableLombokSupport(): boolean {
+	return lombokSupportEnable;
+}
 
 export function importedLombok(context : ExtensionContext): boolean {
 	return context.workspaceState.get(JAVA_LOMBOK_IMPORTED);
@@ -130,7 +135,6 @@ export async function checkLombokDependency(context: ExtensionContext){
 
 export function addLombokChangeVersionCommand(context : ExtensionContext) {
 	if(hasLombokChangeVersionCommand){
-		console.log("lombok change version command exist.");
 		return;
 	}
 	context.subscriptions.push(commands.registerCommand(Commands.LOMBOK_CONFIGURE, async (buildFilePath: string) => {
