@@ -553,7 +553,25 @@ export class StandardLanguageClient {
 		this.languageClient = null;
 		await oldLanguageClient.stop();
 		const delay = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
-		while(true) {
+		const stopTitle = "Stopping Java Language Server...";
+		await window.withProgress({
+			location: ProgressLocation.Notification,
+			title: stopTitle,
+			cancellable: false,
+		}, async () => {
+			while(true) {
+				try {
+					await delay(500);
+					process.kill(pid, 0);
+					console.log("wait for pid : " + pid);
+					continue;
+				}
+				catch{
+					return;
+				}
+			}
+		});
+		/*while(true) {
 			try {
 				await delay(500);
 				process.kill(pid, 0);
@@ -563,10 +581,26 @@ export class StandardLanguageClient {
 			catch{
 				break;
 			}
-		}
-		await this.createLanguageClient(context, requirements, clientOptions, workspacePath, resolve);
-		this.languageClient.start();
-		this.status = ClientStatus.Starting;
+		}*/
+		const restartTitle = "Restarting Java Language Server...";
+		await window.withProgress({
+			location: ProgressLocation.Notification,
+			title: restartTitle,
+			cancellable: false,
+		}, async () => {
+			await this.createLanguageClient(context, requirements, clientOptions, workspacePath, resolve);
+			this.languageClient.start();
+			this.status = ClientStatus.Starting;
+			while(true){
+				if(this.getClientStatus() === ClientStatus.Started){
+					return;
+				}
+				await delay(500);
+			}
+		})
+		//await this.createLanguageClient(context, requirements, clientOptions, workspacePath, resolve);
+		//this.languageClient.start();
+		//this.status = ClientStatus.Starting;
 	}
 
 	public getClient(): LanguageClient {
