@@ -5,7 +5,7 @@
   "author": "Red Hat",
   "icon": "icons/icon128.png",
   "license": "EPL-2.0",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "publisher": "redhat",
   "bugs": "https://github.com/redhat-developer/vscode-java/issues",
   "preview": false,
@@ -957,6 +957,11 @@
         "category": "Java"
       },
       {
+        "command": "java.project.build",
+        "title": "%java.project.build%",
+        "category": "Java"
+      },
+      {
         "command": "java.open.formatter.settings",
         "title": "%java.open.formatter.settings%",
         "category": "Java"
@@ -1108,6 +1113,10 @@
         },
         {
           "command": "java.workspace.compile",
+          "when": "javaLSReady"
+        },
+        {
+          "command": "java.project.build",
           "when": "javaLSReady"
         },
         {

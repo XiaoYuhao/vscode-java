@@ -91,12 +91,13 @@ Available commands
 ==========================
 The following commands are available:
 - `Switch to Standard Mode`: switches the Java Language Server to `Standard` mode. This command is only available when the Java Language Server is in `LightWeight` mode.
-- `Java: Update Project` (`Shift+Alt+U`): is available when the editor is focused on a Maven pom.xml or a Gradle file. It forces project configuration / classpath updates (eg. dependency changes or Java compilation level), according to the project build descriptor.
+- `Java: Reload Project` (`Shift+Alt+U`): It forces project configuration / classpath updates (eg. dependency changes or Java compilation level), according to the project build descriptor.
 - `Java: Import Java Projects into Workspace`: detects and imports all the Java projects into the Java Language Server workspace.
 - `Java: Open Java Language Server Log File`: opens the Java Language Server log file, useful for troubleshooting problems.
 - `Java: Open Java Extension Log File`: opens the Java extension log file, useful for troubleshooting problems.
 - `Java: Open All Log Files`: opens both the Java Language Server log file and the Java extension log file.
 - `Java: Force Java Compilation` (`Shift+Alt+B`): manually triggers compilation of the workspace.
+- `Java: Rebuild Projects`: manually triggers a full build of the selected projects.
 - `Java: Open Java Formatter Settings`: opens the Eclipse formatter settings. Creates a new settings file if none exists.
 - `Java: Clean Java Language Server Workspace`: cleans the Java language server workspace.
 - `Java: Attach Source`: attaches a jar/zip source to the currently opened binary class file. This command is only available in the editor context menu.
@@ -111,6 +112,7 @@ Supported VS Code settings
 The following settings are supported:
 
 * `java.home` : **Deprecated, please use 'java.jdt.ls.java.home' instead.** Absolute path to JDK home folder used to launch the Java Language Server. Requires VS Code restart.
+* `java.jdt.ls.lombokSupport.enabled`: Whether to load lombok processors from project classpath. Defaults to `true`.
 * `java.jdt.ls.vmargs` : Extra VM arguments used to launch the Java Language Server. Requires VS Code restart.
 * `java.errors.incompleteClasspath.severity` : Specifies the severity of the message when the classpath is incomplete for a Java file. Supported values are `ignore`, `info`, `warning`, `error`.
 * `java.trace.server` : Traces the communication between VS Code and the Java language server.
@@ -196,10 +198,10 @@ The following settings are supported:
   - `lastMember`: Insert the generated code as the last member of the target type.
 * `java.settings.url` : Specifies the url or file path to the workspace Java settings. See [Setting Global Preferences](https://github.com/redhat-developer/vscode-java/wiki/Settings-Global-Preferences)
 * `java.symbols.includeSourceMethodDeclarations` : Include method declarations from source files in symbol search. Defaults to `false`.
- * `java.quickfix.showAt` : Show quickfixes at the problem or line level.
- * `java.configuration.workspaceCacheLimit` : The number of days (if enabled) to keep unused workspace cache data. Beyond this limit, cached workspace data may be removed.
- * `java.import.generatesMetadataFilesAtProjectRoot` : Specify whether the project metadata files(.project, .classpath, .factorypath, .settings/) will be generated at the project root. Defaults to `false`.
- * `java.inlayHints.parameterNames.enabled`: Enable/disable inlay hints for parameter names. Supported values are: `none`(disable parameter name hints), `literals`(Enable parameter name hints only for literal arguments) and `all`(Enable parameter name hints for literal and non-literal arguments). Defaults to `literals`.
+* `java.quickfix.showAt` : Show quickfixes at the problem or line level.
+* `java.configuration.workspaceCacheLimit` : The number of days (if enabled) to keep unused workspace cache data. Beyond this limit, cached workspace data may be removed.
+* `java.import.generatesMetadataFilesAtProjectRoot` : Specify whether the project metadata files(.project, .classpath, .factorypath, .settings/) will be generated at the project root. Defaults to `false`.
+* `java.inlayHints.parameterNames.enabled`: Enable/disable inlay hints for parameter names. Supported values are: `none`(disable parameter name hints), `literals`(Enable parameter name hints only for literal arguments) and `all`(Enable parameter name hints for literal and non-literal arguments). Defaults to `literals`.
 
 New in 1.8.0
  * `java.jdt.ls.lombokSupport.enabled`: Whether to load lombok processors from project classpath. Defaults to `true`.

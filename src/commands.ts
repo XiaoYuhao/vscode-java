@@ -40,7 +40,7 @@ export namespace Commands {
     export const MARKDOWN_API_RENDER = 'markdown.api.render';
 
     /**
-     * Update project configuration
+     * Reload project
      */
     export const CONFIGURATION_UPDATE = 'java.projectConfiguration.update';
 
@@ -78,6 +78,11 @@ export namespace Commands {
 	 * Execute Workspace build (compilation)
 	 */
     export const COMPILE_WORKSPACE = 'java.workspace.compile';
+
+    /**
+     * Execute build for projects
+     */
+    export const BUILD_PROJECT = 'java.project.build';
 
     /**
     * Open Java Language Server Log file
