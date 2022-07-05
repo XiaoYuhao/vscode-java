@@ -176,6 +176,14 @@ export namespace Commands {
      * Generate Constructors.
      */
     export const GENERATE_CONSTRUCTORS_PROMPT = 'java.action.generateConstructorsPrompt';
+	/**
+     * Generate No Args Constructors.
+     */
+	export const GENERATE_NOARGS_CONSTRUCTORS_PROMPT = 'java.action.generateNoArgsConstructorsPrompt';
+	 /**
+     * Generate No Args Constructors.
+     */
+	export const GENERATE_DATA_PROMPT = 'java.action.generateDataPrompt';
     /**
      * Generate Delegate Methods.
      */

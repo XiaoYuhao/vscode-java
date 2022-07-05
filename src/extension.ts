@@ -305,6 +305,7 @@ export function activate(context: ExtensionContext): Promise<ExtensionAPI> {
 									result.push(client.protocol2CodeConverter.asCodeAction(item));
 								}
 							}
+							console.log(result);
 							return result;
 						}, (error) => {
 							client.logFailedRequest(CodeActionRequest.type, error);

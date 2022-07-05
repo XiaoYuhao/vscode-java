@@ -77,17 +77,17 @@ export async function checkLombokDependency(context: ExtensionContext){
 	const projectUris: string[] = await commands.executeCommand<string[]>(Commands.EXECUTE_WORKSPACE_COMMAND, Commands.GET_ALL_JAVA_PROJECTS);
 	for(var i = 0; i<projectUris.length; i++){
 		const classpathResult = await apiManager.getApiInstance().getClasspaths(projectUris[i], {scope: 'runtime'});
-		console.log(classpathResult)
+		// console.log(classpathResult)
 		for(var j = 0; j < classpathResult.classpaths.length; j++){
 			let classpath = classpathResult.classpaths[j];
-			console.log(classpath);
+			// console.log(classpath);
 			if(reg.test(classpath)){
 				console.log(classpath);
 				if(context.workspaceState.get(JAVA_LOMBOK_IMPORTED)==true){
 					currentLombokVersion = reg.exec(classpath)[0];
 					previousLombokVersion = reg.exec(context.workspaceState.get(JAVA_LOMBOK_PATH))[0];
-					console.log("CurrentLombokVersion:" + currentLombokVersion);
-					console.log("PreviousLombokVersion:" + previousLombokVersion);
+					// console.log("CurrentLombokVersion:" + currentLombokVersion);
+					// console.log("PreviousLombokVersion:" + previousLombokVersion);
 					if(currentLombokVersion!=previousLombokVersion){
 						needReload = true;
 						versionChange = true;
@@ -211,7 +211,7 @@ export namespace LombokVersionItemFactory {
 			item.severity = vscode.LanguageStatusSeverity?.Information;
 			item.name = "Lombok Version";
 			item.text = text;
-			console.log("LombokVersionItem create text : " + text);
+			// console.log("LombokVersionItem create text : " + text);
 			if(buildFilePath){
 				item.command = getLombokChangeCommand(buildFilePath);
 			}
@@ -221,7 +221,7 @@ export namespace LombokVersionItemFactory {
 	}
 
 	export function update(item: any, text: string, buildFilePath: string): void {
-		console.log("LombokVersionItem update text : " + text);
+		// console.log("LombokVersionItem update text : " + text);
 		item.text = text;
 		if(buildFilePath){
 			item.command = getLombokChangeCommand(buildFilePath);

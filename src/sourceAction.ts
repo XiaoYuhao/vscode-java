@@ -16,7 +16,9 @@ export function registerCommands(languageClient: LanguageClient, context: Extens
     registerGenerateToStringCommand(languageClient, context);
     registerGenerateAccessorsCommand(languageClient, context);
     registerGenerateConstructorsCommand(languageClient, context);
+	registerNoArgsGenerateConstructorsCommand(languageClient, context);
     registerGenerateDelegateMethodsCommand(languageClient, context);
+	registerDataCommand(languageClient, context);
 }
 
 function registerOverrideMethodsCommand(languageClient: LanguageClient, context: ExtensionContext): void {
@@ -318,6 +320,119 @@ function registerGenerateConstructorsCommand(languageClient: LanguageClient, con
         });
         await applyWorkspaceEdit(workspaceEdit, languageClient);
         await revealWorkspaceEdit(workspaceEdit, languageClient);
+    }));
+}
+
+function registerNoArgsGenerateConstructorsCommand(languageClient: LanguageClient, context: ExtensionContext): void {
+    context.subscriptions.push(commands.registerCommand(Commands.GENERATE_NOARGS_CONSTRUCTORS_PROMPT, async (params: CodeActionParams) => {
+        const status = await languageClient.sendRequest(CheckConstructorStatusRequest.type, params);
+        if (!status || !status.constructors || !status.constructors.length) {
+            return;
+        }
+
+        let selectedConstructors = status.constructors;
+        let selectedFields = [];
+        if (status.constructors.length > 1) {
+            const constructorItems = status.constructors.map((constructor) => {
+                return {
+                    label: `${constructor.name}(${constructor.parameters.join(',')})`,
+                    originalConstructor: constructor,
+                };
+            });
+            const selectedConstructorItems = await window.showQuickPick(constructorItems, {
+                canPickMany: true,
+                placeHolder: 'Select super class constructor(s).',
+            });
+            if (!selectedConstructorItems || !selectedConstructorItems.length) {
+                return;
+            }
+
+            selectedConstructors = selectedConstructorItems.map(item => item.originalConstructor);
+        }
+
+        if (status.fields.length) {
+            const fieldItems = status.fields.map((field) => {
+                return {
+                    label: `${field.name}: ${field.type}`,
+                    originalField: field,
+                };
+            });
+            const selectedFieldItems = await window.showQuickPick(fieldItems, {
+                canPickMany: true,
+                placeHolder: 'Select fields to initialize by constructor(s).',
+            });
+            if (!selectedFieldItems) {
+                return;
+            }
+
+            selectedFields = selectedFieldItems.map(item => item.originalField);
+        }
+
+        const workspaceEdit = await languageClient.sendRequest(GenerateConstructorsRequest.type, {
+            context: params,
+            constructors: selectedConstructors,
+            fields: selectedFields,
+        });
+        await applyWorkspaceEdit(workspaceEdit, languageClient);
+        await revealWorkspaceEdit(workspaceEdit, languageClient);
+    }));
+}
+
+function registerDataCommand(languageClient: LanguageClient, context: ExtensionContext): void {
+    context.subscriptions.push(commands.registerCommand(Commands.GENERATE_DATA_PROMPT, async (params: CodeActionParams) => {
+		console.log("Get accessors...");
+		const accessors = await languageClient.sendRequest(AccessorCodeActionRequest.type, params);
+    	if (!accessors || !accessors.length) {
+        	return;
+    	}
+		const status = await languageClient.sendRequest(CheckConstructorStatusRequest.type, params);
+        if (!status || !status.constructors || !status.constructors.length) {
+            return;
+        }
+		/*
+    	const accessorItems = accessors.map((accessor) => {
+        	const description = [];
+        	if (accessor.generateGetter) {
+        	    description.push('getter');
+        	}
+        	if (accessor.generateSetter) {
+        	    description.push('setter');
+        	}
+        	return {
+        	    label: `${accessor.fieldName}: ${accessor.typeName}`,
+        	    description: (accessor.isStatic ? 'static ' : '')+ description.join(', '),
+        	    originalField: accessor,
+        	};
+    	});
+    	let accessorsKind: string;
+    	switch (params.kind) {
+        	case AccessorKind.BOTH:
+        	    accessorsKind = "getters and setters";
+        	    break;
+        	case AccessorKind.GETTER:
+        	    accessorsKind = "getters";
+        	    break;
+        	case AccessorKind.SETTER:
+        	    accessorsKind = "setters";
+        	    break;
+        	default:
+            	return;
+    	}
+    	const selectedAccessors = await window.showQuickPick(accessorItems, {
+    	    canPickMany: true,
+    	    placeHolder: `Select the fields to generate ${accessorsKind}`
+    	});
+    	if (!selectedAccessors || !selectedAccessors.length) {
+    	    return;
+    	}
+		*/
+		console.log("Generate data...");
+    	const workspaceEdit = await languageClient.sendRequest(GenerateAccessorsRequest.type, {
+    	    context: params,
+    	    accessors: accessors,
+    	});
+    	await applyWorkspaceEdit(workspaceEdit, languageClient);
+    	await revealWorkspaceEdit(workspaceEdit, languageClient);
     }));
 }
 
